@@ -1,0 +1,42 @@
+{
+  "name": "svelte-yagames",
+  "version": "0.1.0",
+  "type": "module",
+  "scripts": {
+    "build": "svelte-package",
+    "preview": "vite preview"
+  },
+  "files": ["dist"],
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "svelte": "./dist/index.js"
+    },
+    "./actions": {
+      "types": "./dist/actions/index.d.ts",
+      "import": "./dist/actions/index.js",
+      "svelte": "./dist/actions/index.js"
+    },
+    "./utilities": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/utilities/index.js",
+      "svelte": "./dist/utilities/index.js"
+    }
+  },
+  "devDependencies": {
+    "@sveltejs/package": "^2.0.2",
+    "@sveltejs/vite-plugin-svelte": "^2.4.1",
+    "@tsconfig/svelte": "^4.0.1",
+    "tslib": "^2.5.3",
+    "tsup": "^6.7.0",
+    "typescript": "^5.1.3"
+  },
+  "dependencies": {
+    "copy-text-to-clipboard": "^3.1.0",
+    "svelte": "^3.59.1"
+  },
+  "peerDependencies": {
+    "svelte": "*"
+  }
+}
