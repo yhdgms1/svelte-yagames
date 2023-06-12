@@ -1,6 +1,6 @@
 {
   "name": "svelte-yagames",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "type": "module",
   "scripts": {
     "build": "svelte-package",
@@ -22,7 +22,13 @@
       "types": "./dist/index.d.ts",
       "import": "./dist/utilities/index.js",
       "svelte": "./dist/utilities/index.js"
-    }
+    },
+    "./reset.css": {
+      "import": "./dist/reset.css",
+      "require": "./dist/reset.css",
+      "svelte": "./dist/reset.css"
+    },
+    "./package.json": "./package.json"
   },
   "devDependencies": {
     "@sveltejs/package": "^2.0.2",

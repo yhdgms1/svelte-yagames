@@ -6,7 +6,6 @@ const throttle = <Fn extends ((...args: any[]) => any)>(fn: Fn, ms: number) => {
   let throttled = false, savedArgs: any, savedThis: any;
 
   function wrapper() {
-
     if (throttled) {
       savedArgs = arguments;
       savedThis = this;
