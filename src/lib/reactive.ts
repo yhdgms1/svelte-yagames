@@ -8,7 +8,7 @@ import { throttle, isEmpty } from './utilities';
  * Функция для автоматической синхронизации сторов и их данных на сервере
  * @param param0 Начальные данные
  */
-const createReactive = <D extends Record<any, any>, S extends Record<string, number>>({ data, stats }: { data: D, stats: S }) => {
+const createReactive = <D extends Record<any, any>, S extends Record<string, number>>({ data, stats }: { data: D, stats: S }, throtte_ms = 750) => {
   /**
    * Если нет ни 'data' ни 'stats', то скорее всего 'createReactive' используется неправильно
    */
@@ -46,26 +46,26 @@ const createReactive = <D extends Record<any, any>, S extends Record<string, num
     check(_stats, stats$);
 
     const sub = (store: Writable<Record<any, any>>, method: "data" | "stats") => {
-      let as_string = '';
+      let prev = '';
 
       const throttled = throttle((data: Record<any, any>) => {
-        const stringified = JSON.stringify(data);
+        const as_string = JSON.stringify(data);
 
         /**
          * Если данные одинаковые, то нельзя их посылать ещё раз
          */
-        if (as_string === stringified) return;
+        if (as_string === prev) return;
 
         /**
          * Обновляем переменную
          */
-        as_string = stringified;
+        prev = as_string;
 
         /**
          * Реализация `throttle` не поддерживает async-await, поэтому не дожидаемся окончания загрузки
          */
         games[method].set(data);
-      }, 750);
+      }, throtte_ms);
 
       return store.subscribe(throttled);
     }

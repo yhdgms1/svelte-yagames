@@ -2,32 +2,33 @@ import type { SDK } from './sdk';
 
 import copy from 'copy-text-to-clipboard';
 
-const createStorage = (key: string) => {
-  const createMarked = (mark: string) => ({
-    async get() {
-      try {
-        const value = localStorage.getItem(`${key}-${mark}`)
-        const parsed = value ? JSON.parse(value) : null
-
-        return parsed || {};
-      } catch {
-        return {};
-      }
-    },
-    async set(data: unknown) {
-      try {
-        return localStorage.setItem(`${key}-${mark}`, JSON.stringify(data))
-      } finally { }
-    },
-  });
-
-  const DataStorage = createMarked('data');
-  const StatsStorage = createMarked('stats');
-
-  return { DataStorage, StatsStorage }
+/**
+ * Мутабельный объект, призванный упростить настройку хранилища
+ */
+const SHARED = {
+  key: 'game'
 }
 
-const { DataStorage, StatsStorage } = createStorage('game');
+const createMarked = (mark: string) => ({
+  async get() {
+    try {
+      const value = localStorage.getItem(`${SHARED.key}-${mark}`)
+      const parsed = value ? JSON.parse(value) : null
+
+      return parsed || {};
+    } catch {
+      return {};
+    }
+  },
+  async set(data: unknown) {
+    try {
+      localStorage.setItem(`${SHARED.key}-${mark}`, JSON.stringify(data))
+    } finally { }
+  },
+});
+
+const DataStorage = createMarked('data');
+const StatsStorage = createMarked('stats');
 
 const noop = () => {};
 const async_noop = async () => {};
@@ -224,4 +225,4 @@ const ExternalSDK: SDK = {
   }
 }
 
-export { ExternalSDK, DataStorage, StatsStorage }
+export { ExternalSDK, DataStorage, StatsStorage, SHARED }

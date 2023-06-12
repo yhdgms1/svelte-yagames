@@ -4,7 +4,7 @@
   import type { Games } from './context';
 
   import { get_set } from './context';
-  import { ExternalSDK, DataStorage as ExternalDataStorage, StatsStorage as ExternalStatsStorage } from './external';
+  import { ExternalSDK, DataStorage as ExternalDataStorage, StatsStorage as ExternalStatsStorage, SHARED } from './external';
 
   type OnBeforeLoaded = (sdk: SDK) => Thenable<void>;
   type OnGamesObject = (games: Games) => Thenable<void>;
@@ -18,6 +18,16 @@
      */
     player: GetPlayerOptions
   };
+  /**
+   * Ключ, по которому будут храниться игровые данные при отсутствии оффициального SDK Яндекса
+   */
+  type StorageKey = string;
+  /**
+   * Настройки хранилища, которое используется при отсутствии оффициального SDK Яндекса
+   */
+  type Storage = {
+    key: StorageKey;
+  };
 </script>
 
 <script lang="ts">
@@ -25,6 +35,7 @@
     onBeforeLoaded?: OnBeforeLoaded;
     onGamesObject?: OnGamesObject;
     options?: Options;
+    storage?: Storage;
   };
 
   export let onBeforeLoaded: OnBeforeLoaded = () => {};
@@ -33,6 +44,11 @@
     init: {},
     player: { scopes: false }
   };
+  export let storage: Storage = {
+    key: 'game'
+  }
+
+  SHARED.key = storage.key;
 
   const set = get_set();
 
