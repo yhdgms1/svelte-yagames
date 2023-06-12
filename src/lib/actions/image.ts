@@ -11,7 +11,7 @@ const CSS = '-webkit-tap-highlight-color:transparent;-webkit-touch-callout:none;
  * @param node Картинка
  * @param styles Установить стили или нет
  */
-const image: Action<HTMLImageElement, boolean> = (node, styles = true) => {
+const image: Action<HTMLImageElement | HTMLPictureElement | HTMLSourceElement | SVGImageElement, boolean> = (node, styles = true) => {
   node.setAttribute('draggable', 'false');
 
   if (styles) node.style.cssText += CSS;
