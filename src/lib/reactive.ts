@@ -3,6 +3,7 @@ import type { Writable, Unsubscriber } from 'svelte/store';
 
 import { writable } from 'svelte/store';
 import { throttle, isEmpty } from './utilities';
+import { noop } from 'svelte/internal';
 
 /**
  * Функция для автоматической синхронизации сторов и их данных на сервере
@@ -22,7 +23,7 @@ const createReactive = <D extends Record<any, any>, S extends Record<string, num
   const unsubscribers = new Set<Unsubscriber>();
 
   const init = async (games: Games) => {
-    const [_data, _stats] = await Promise.all([
+    const [_data, _stats] = await Promise.allSettled([
       /**
        * Если начальные 'data' или 'stats', которые также используются дли типизации, пусты, то скорее всего в игре они не используются
        * 
@@ -35,11 +36,10 @@ const createReactive = <D extends Record<any, any>, S extends Record<string, num
     /**
      * Если загруженные данные не пустой объект, значит, некоторые данные уже были сохранены
      */
-    const check = (obj: Record<any, any>, store: Writable<Record<any, any>>) => {
-      /**
-       * И тогда они устанавливаются в стор
-       */
-      if (!isEmpty(obj)) store.set(obj);
+    const check = (obj: PromiseSettledResult<Record<any, any>>, store: Writable<Record<any, any>>) => {
+      if (obj.status === 'fulfilled' && !isEmpty(obj.value)) {
+        store.set(obj.value);
+      }
     }
 
     check(_data, data$);
@@ -64,7 +64,7 @@ const createReactive = <D extends Record<any, any>, S extends Record<string, num
         /**
          * Реализация `throttle` не поддерживает async-await, поэтому не дожидаемся окончания загрузки
          */
-        games[method].set(data);
+        games[method].set(data).then(noop, console.error);
       }, throtte_ms);
 
       return store.subscribe(throttled);

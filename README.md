@@ -47,6 +47,9 @@ createReactive — функция для удобной работы с данн
 <script lang="ts" context="module">
   import { GamesProvider, createReactive } from 'svelte-yagames';
 
+  /**
+   * Если произойдёт ошибка при загрузке данных или если данных на сервере нет, то будут использоваться переданные параметры
+   */
   const { init, data, stats } = createReactive({
     data: {
       /**
