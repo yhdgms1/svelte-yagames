@@ -1,12 +1,30 @@
 {
   "name": "svelte-yagames",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "type": "module",
+  "author": {
+    "name": "Artemiy Schukin",
+    "url": "https://github.com/yhdgms1"
+  },
+  "contributors": [
+    {
+      "name": "Artemiy Schukin",
+      "email": "yhdgms1@gmail.com",
+      "url": "https://github.com/yhdgms1"
+    }
+  ],
+  "bugs": {
+    "url": "https://github.com/yhdgms1/svelte-yagames/issues"
+  },
+  "homepage": "https://github.com/yhdgms1/svelte-yagames",
+  "license": "ISC",
   "scripts": {
     "build": "svelte-package",
     "preview": "vite preview"
   },
-  "files": ["dist"],
+  "files": [
+    "dist"
+  ],
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
@@ -28,6 +46,7 @@
       "require": "./dist/reset.css",
       "svelte": "./dist/reset.css"
     },
+    "./*": "./dist/*",
     "./package.json": "./package.json"
   },
   "devDependencies": {
