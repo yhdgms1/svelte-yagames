@@ -85,7 +85,7 @@ interface Player {
    * Возвращает постоянный уникальный идентификатор пользователя
    */
   getUniqueID(): string;
-  getIDsPerGame(): Promise<{ appID: string; userID; }[]>
+  getIDsPerGame(): Promise<{ appID: string; userID: string; }[]>
 
   /**
    * Возвращает имя пользователя
@@ -264,12 +264,171 @@ interface Shortcut {
   }>
 }
 
+type GetLeaderboardEntriesParameters = {
+  /**
+   * Определяет, включать ли авторизованного пользователя в ответ
+   */
+  includeUser: boolean,
+  /**
+   * Количество записей ниже и выше пользователя по лидерборду, которое нужно вернуть. Минимальное значение — 1, максимальное — 10. По умолчанию возвращается 5.
+   */
+  quantityAround: number,
+  /**
+   * Количество записей из топа лидерборда. Минимальное значение — 1, максимальное — 20. По умолчанию возвращается 5.
+   */
+  quantityTop: number
+}
+
+interface Leaderboards {
+  /**
+   * @param leaderboardName Имя лидерборда.
+   */
+  getLeaderboardDescription(leaderboardName: string): Promise<{
+    /**
+     * Идентификатор приложения.
+     */
+    appID: string;
+    /**
+     * Если true, то лидерборд является основным.
+     */
+    dеfault: boolean;
+    description: {
+      /**
+       * Направление сортировки
+       * 
+       * `false` — места отсортированы по убыванию;
+       * `true` — места отсортированы по возрастанию.
+       */
+      invert_sort_order: boolean;
+      score_format: {
+        options: {
+          /**
+           * Размер десятичной части счета.
+           * Например, при `decimal_offset: 2` число `1234` будет отображаться как `12.34`.
+           */
+          decimal_offset: number;
+        }
+      };
+      /**
+       * Тип результата лидерборда.
+       */
+      type: "numeric" | "time";
+    }
+    /**
+     * Имя лидерборда.
+     */
+    name: string;
+    /**
+     * Локализованные названия.
+     */
+    title: Partial<Record<"ru" | "en" | "be" | "uk" | "kk" | "uz" | "tr", string>> & Record<(string & {}), string>
+  }>;
+  /**
+   * @param leaderboardName Имя лидерборда.
+   * @param score Значение результата. Принимается только тип `number`. Не может быть отрицательным. Если тип лидерборда — `time`, то значения необходимо передавать в миллисекундах.
+   * @param extraData Описание пользователя. Необязательный параметр.
+   */
+  setLeaderboardScore(leaderboardName: string, score: number, extraData?: string): Promise<void>;
+  /**
+   * @param leaderboardName Имя лидерборда.
+   */
+  getLeaderboardPlayerEntry(leaderboardName: string): Promise<{
+    /**
+     * Значение результата.
+     */
+    score: number;
+    /**
+     * Описание пользователя.
+     */
+    extraData: string;
+    rank: number;
+    player: {
+      /**
+       * Возвращает URL портрета пользователя. 
+       * @param size Размер портрета пользователя
+       */
+      getAvatarSrc: (size: "small" | "medium" | "large") => string;
+      /**
+       * Возвращает srcset портрета пользователя, который подходит для дисплеев Retina.
+       * @param size Размер портрета пользователя
+       */
+      getAvatarSrcSet: (size: "small" | "medium" | "large") => string;
+      lang: string;
+      publicName: string;
+      scopePermissions: {
+        avatar: string;
+        public_name: string;
+      };
+      uniqueID: string;
+    };
+    formattedScore: string;
+  }>;
+  /**
+   * @param leaderboardName Имя лидерборда.
+   * @param parameters 
+   */
+  getLeaderboardEntries(leaderboardName: string, parameters: GetLeaderboardEntriesParameters): Promise<{
+    leaderboard: unknown;
+    /**
+     * Интервалы мест в ответе.
+     */
+    ranges: {
+      /**
+       * Место в рейтинге. Счет ведется с нуля, поэтому 1-е место считается нулевым элементом.
+       */
+      start: number;
+      /**
+       * Количество запрошенных записей. Если данных не хватает, то может не соответствовать ответу.
+       */
+      size: number;
+    }[];
+    /**
+     * Место пользователя в рейтинге. Если отсутствует, либо запрос на топ без включения пользователя, то равен 0.
+     */
+    userRank: number;
+    /**
+     * Результаты по запросу.
+     */
+    entries: {
+      /**
+       * Значение результата.
+       */
+      score: number;
+      /**
+       * Описание пользователя
+       */
+      extraData: string;
+      rank: number;
+      player: {
+        /**
+         * Возвращает URL портрета пользователя. 
+         * @param size Размер портрета пользователя
+         */
+        getAvatarSrc: (size: "small" | "medium" | "large") => string;
+        /**
+         * Возвращает srcset портрета пользователя, который подходит для дисплеев Retina.
+         * @param size Размер портрета пользователя
+         */
+        getAvatarSrcSet: (size: "small" | "medium" | "large") => string;
+        lang: string,
+        publicName: string,
+        scopePermissions: {
+          avatar: string,
+          public_name: string
+        },
+        uniqueID: string,
+      },
+      formattedScore: string
+    }[]
+  }>
+}
+
 interface SDK {
   auth: Auth;
 
   getPlayer(options?: GetPlayerOptions): Promise<Player>;
 
-  isAvailableMethod(method: string): Promise<boolean>;
+  isAvailableMethod(method: 'leaderboards.setLeaderboardScore' | (string & {})): Promise<boolean>;
 
   getStorage(): Promise<Storage>
 
@@ -282,7 +441,12 @@ interface SDK {
   dispatchEvent(eventName: ESdkEventName, detail?: Record<any, any>): Promise<unknown>;
   onEvent(eventName: ESdkEventName, listener: () => void): () => void;
 
-  getLeaderboards(): Promise<any>;
+  getLeaderboards(): Promise<Leaderboards>;
+
+  /**
+   * Это не будет описан мной, поскольку не использую платежи
+   */
+  getPayments(): Promise<unknown>;
 
   shortcut: Shortcut;
 
