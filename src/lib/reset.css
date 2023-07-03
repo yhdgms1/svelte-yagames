@@ -11,7 +11,7 @@
   box-sizing: border-box;
 }
 
-*, .noselect {
+img, canvas, button, a, p, span, em, br, input, .noselect {
   margin: 0;
 
   /**
@@ -30,8 +30,11 @@
   -moz-user-select: -moz-none;
   -ms-user-select: none;
   user-select: none;
-  touch-action: none;
   cursor: default;
+}
+
+img, canvas, .noselect {
+  touch-action: none;
 }
 
 *::selection, .noselect::selection { 
@@ -56,7 +59,7 @@ img, picture, video, canvas, svg {
 }
 
 img {
-  object-fit: cover;
+  object-fit: contain;
 }
 
 input, button, textarea, select {
