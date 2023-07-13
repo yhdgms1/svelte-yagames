@@ -70,7 +70,19 @@
      * При настоящем SDK - их хранилище, иначе `localStorage`
      */
     const YandexDataStorage = {
-      get: () => player.getData(),
+      get: async () => {
+        try {
+          return await player.getData()
+        } catch {
+          /**
+           * В случае ошибки получения данных через getData используется localStorage
+           */
+          YandexDataStorage.get = ExternalDataStorage.get;
+          YandexDataStorage.set = ExternalDataStorage.set;
+
+          return await ExternalDataStorage.get();
+        }
+      },
       set: (data: unknown) => player.setData(data),
     };
 
@@ -78,7 +90,19 @@
      * При настоящем SDK - их хранилище, иначе `localStorage`
      */
     const YandexStatsStorage = {
-      get: () => player.getStats(),
+      get: async () => {
+        try {
+          return await player.getStats()
+        } catch {
+          /**
+           * В случае ошибки получения данных через getStats используется localStorage
+           */
+          YandexStatsStorage.get = ExternalStatsStorage.get;
+          YandexStatsStorage.set = ExternalStatsStorage.set;
+
+          return await ExternalStatsStorage.get();
+        }
+      },
       set: (data: Record<string, number>) => player.setStats(data)
     }
 
