@@ -58,7 +58,7 @@
     /**
      * Получает либо настоящий SDK либо альтернативу
      */
-    const sdk = isExternalSDK ? ExternalSDK : await window.YaGames.init(options.init);
+    let sdk = isExternalSDK ? ExternalSDK : await window.YaGames.init(options.init);
 
     await onBeforeLoaded(sdk);
 
@@ -69,6 +69,10 @@
        * В случае ошибки при получении player используется fallback
        */
       var player = await ExternalSDK.getPlayer(options.player);
+      /**
+       * sdk также заменяем
+       */
+      sdk = ExternalSDK;
     }
 
     const authorized = player.getMode() !== 'lite';
