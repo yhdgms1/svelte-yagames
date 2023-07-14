@@ -62,7 +62,14 @@
 
     await onBeforeLoaded(sdk);
 
-    const player = await sdk.getPlayer(options.player);
+    try {
+      var player = await sdk.getPlayer(options.player);
+    } catch {
+      /**
+       * В случае ошибки при получении player используется fallback
+       */
+      var player = await ExternalSDK.getPlayer(options.player);
+    }
 
     const authorized = player.getMode() !== 'lite';
 
