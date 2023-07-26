@@ -1,10 +1,11 @@
 <script context="module" lang="ts">
   import type { SDK, InitOptions, GetPlayerOptions } from './sdk';
-  import type { Thenable } from './types';
+  import type { Thenable, SavedData } from './types';
   import type { Games } from './context';
 
   import { get_set } from './context';
   import { ExternalSDK, DataStorage as ExternalDataStorage, StatsStorage as ExternalStatsStorage, SHARED } from './external';
+  import { getNewest } from './utilities';
 
   type OnBeforeLoaded = (sdk: SDK) => Thenable<void>;
   type OnGamesObject = (games: Games) => Thenable<void>;
@@ -36,6 +37,7 @@
     onGamesObject?: OnGamesObject;
     options?: Options;
     storage?: Storage;
+    respectExternalStore?: boolean;
   };
 
   export let onBeforeLoaded: OnBeforeLoaded = () => {};
@@ -47,6 +49,7 @@
   export let storage: Storage = {
     key: 'game'
   }
+  export let respectExternalStore = false;
 
   SHARED.key = storage.key;
 
@@ -77,13 +80,32 @@
 
     const authorized = player.getMode() !== 'lite';
 
+    ExternalDataStorage.set = (data) => {
+      if (!respectExternalStore) {
+        return ExternalDataStorage.set(data);
+      }
+
+      return ExternalDataStorage.set({
+        timestamp: Date.now(),
+        data: data,
+      });
+    };
+
     /**
      * При настоящем SDK - их хранилище, иначе `localStorage`
      */
     const YandexDataStorage = {
       get: async () => {
+        const external: SavedData = await ExternalDataStorage.get();
+
         try {
-          return await player.getData()
+          const data: SavedData = await player.getData();
+
+          if (!respectExternalStore) {
+            return data;
+          }
+
+          return getNewest(data, external);
         } catch {
           /**
            * В случае ошибки получения данных через getData используется localStorage
@@ -91,10 +113,22 @@
           YandexDataStorage.get = ExternalDataStorage.get;
           YandexDataStorage.set = ExternalDataStorage.set;
 
-          return await ExternalDataStorage.get();
+          return external;
         }
       },
-      set: (data: unknown) => player.setData(data),
+      set: (data: unknown) => {
+        if (!respectExternalStore) {
+          return player.setData(data);
+        }
+
+        /**
+         * Добавляется поле `timestamp` для проверки того, что новее
+         */
+        return player.setData({
+          timestamp: Date.now(),
+          data: data,
+        });
+      },
     };
 
     /**

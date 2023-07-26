@@ -1,3 +1,8 @@
 type Thenable<T> = T | Promise<T>;
 
-export type { Thenable }
+type SavedData = Record<PropertyKey, any> | {
+  timestamp: number;
+  data: Record<PropertyKey, any>;
+};
+
+export type { Thenable, SavedData }
