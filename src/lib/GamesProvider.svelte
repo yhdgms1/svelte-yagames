@@ -5,7 +5,6 @@
 
   import { get_set } from './context';
   import { ExternalSDK, DataStorage as ExternalDataStorage, StatsStorage as ExternalStatsStorage, SHARED } from './external';
-  import { getNewest } from './utilities';
 
   type OnBeforeLoaded = (sdk: SDK) => Thenable<void>;
   type OnGamesObject = (games: Games) => Thenable<void>;
@@ -37,7 +36,6 @@
     onGamesObject?: OnGamesObject;
     options?: Options;
     storage?: Storage;
-    respectExternalStore?: boolean;
   };
 
   export let onBeforeLoaded: OnBeforeLoaded = () => {};
@@ -49,7 +47,6 @@
   export let storage: Storage = {
     key: 'game'
   }
-  export let respectExternalStore = false;
 
   SHARED.key = storage.key;
 
@@ -80,19 +77,6 @@
 
     const authorized = player.getMode() !== 'lite';
 
-    const originalExternalDataStorageSetMethod = ExternalDataStorage.set;
-
-    ExternalDataStorage.set = (data) => {
-      if (!respectExternalStore) {
-        return originalExternalDataStorageSetMethod(data);
-      }
-
-      return originalExternalDataStorageSetMethod({
-        timestamp: Date.now(),
-        data: data,
-      });
-    };
-
     /**
      * При настоящем SDK - их хранилище, иначе `localStorage`
      */
@@ -103,11 +87,7 @@
         try {
           const data: SavedData = await player.getData();
 
-          if (!respectExternalStore) {
-            return data;
-          }
-
-          return getNewest(data, external);
+          return data;
         } catch {
           /**
            * В случае ошибки получения данных через getData используется localStorage
@@ -119,17 +99,7 @@
         }
       },
       set: (data: unknown) => {
-        if (!respectExternalStore) {
-          return player.setData(data);
-        }
-
-        /**
-         * Добавляется поле `timestamp` для проверки того, что новее
-         */
-        return player.setData({
-          timestamp: Date.now(),
-          data: data,
-        });
+        return player.setData(data);
       },
     };
 
