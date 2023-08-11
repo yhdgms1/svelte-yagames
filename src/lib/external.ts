@@ -20,10 +20,10 @@ const createMarked = (mark: string) => ({
       return {};
     }
   },
-  async set(data: unknown) {
+  async set(data: unknown) { 
     try {
       localStorage.setItem(`${SHARED.key}-${mark}`, JSON.stringify(data))
-    } finally { }
+    } catch { }
   },
 });
 
@@ -37,6 +37,7 @@ const async_stub_false = async () => false;
 
 const REWARD = true;
 
+// @ts-ignore
 const ExternalSDK: SDK = {
   features: {
     LoadingAPI: {

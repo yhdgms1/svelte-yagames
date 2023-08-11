@@ -80,12 +80,14 @@
 
     const authorized = player.getMode() !== 'lite';
 
+    const originalExternalDataStorageSetMethod = ExternalDataStorage.set;
+
     ExternalDataStorage.set = (data) => {
       if (!respectExternalStore) {
-        return ExternalDataStorage.set(data);
+        return originalExternalDataStorageSetMethod(data);
       }
 
-      return ExternalDataStorage.set({
+      return originalExternalDataStorageSetMethod({
         timestamp: Date.now(),
         data: data,
       });
