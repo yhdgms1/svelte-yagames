@@ -1,6 +1,6 @@
 {
   "name": "svelte-yagames",
-  "version": "0.3.3",
+  "version": "0.3.4",
   "type": "module",
   "author": {
     "name": "Artemiy Schukin",
@@ -27,9 +27,9 @@
   ],
   "exports": {
     ".": {
-      "types": "./index.d.ts",
-      "import": "./index.js",
-      "svelte": "./index.js"
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "svelte": "./dist/index.js"
     },
     "./actions": {
       "types": "./dist/actions/index.d.ts",
